@@ -1,14 +1,20 @@
 from fastapi import FastAPI, HTTPException
 from typing import Optional
 
+from pydantic import BaseModel
+
 app = FastAPI()
 
-class Blog: 
+class Blog(BaseModel): 
     id: int
     title: str
     body: str
     published: bool = True
     vote: Optional[int] = None
+
+class ShowBlog(BaseModel):
+    title: str
+    body: str
 
 blogs = [
     Blog(id=1, title="First Blog", body="This is the body of the first blog", published=True, vote=10),
@@ -22,7 +28,7 @@ def find_blog(id: int):
             return blog
     return None
 
-@app.get("/blogs")
+@app.get("/blogs", response_model=list[ShowBlog])
 def read_blogs():
     return blogs
 
