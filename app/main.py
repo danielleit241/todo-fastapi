@@ -1,60 +1,29 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 from typing import Optional
-
 from pydantic import BaseModel
+from app.seed import seed_data
+from . import models
+from .database import get_db
+
+seed_data()
 
 app = FastAPI()
 
-class Blog(BaseModel): 
+class Post(BaseModel): 
     id: int
     title: str
-    body: str
+    content: str
     published: bool = True
     vote: Optional[int] = None
 
-blogs = [
-    Blog(id=1, title="First Blog", body="This is the body of the first blog", published=True, vote=10),
-    Blog(id=2, title="Second Blog", body="This is the body of the second blog", published=False),
-    Blog(id=3, title="Third Blog", body="This is the body of the third blog", published=True, vote=5),
-]
+@app.get("/posts", response_model=list[Post])
+def read_posts(db=Depends(get_db)):
+    posts = db.query(models.Post).all()
+    return posts
 
-def find_blog(id: int):
-    for blog in blogs:
-        if blog.id == id:
-            return blog
-    return None
-
-@app.get("/blogs", response_model=list[Blog])
-def read_blogs():
-    return blogs
-
-@app.get("/blogs/{id}")
-def read_blog(id: int):
-    blog = find_blog(id)
-    if not blog:
-        raise HTTPException(status_code=404, detail="Blog not found")
-    return blog
-
-@app.post("/blogs")
-def create_blog(blog: Blog):
-    blogs.append(blog)
-    return blog
-
-@app.put("/blogs/{id}")
-def update_blog(id: int, updated_blog: Blog):
-    blog = find_blog(id)
-    if not blog:
-        raise HTTPException(status_code=404, detail="Blog not found")
-    blog.title = updated_blog.title
-    blog.body = updated_blog.body
-    blog.published = updated_blog.published
-    blog.vote = updated_blog.vote
-    return blog
-
-@app.delete("/blogs/{id}")
-def delete_blog(id: int):
-    blog = find_blog(id)
-    if not blog:
-        raise HTTPException(status_code=404, detail="Blog not found")
-    blogs.remove(blog)
-    return {"detail": "Blog deleted"}
+@app.get("/posts/{id}", response_model=Post)
+def get_post_by_id(id: int, db=Depends(get_db)):
+    post = db.query(models.Post).filter(models.Post.id == id).first()
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+    return post
