@@ -12,10 +12,6 @@ class Blog(BaseModel):
     published: bool = True
     vote: Optional[int] = None
 
-class ShowBlog(BaseModel):
-    title: str
-    body: str
-
 blogs = [
     Blog(id=1, title="First Blog", body="This is the body of the first blog", published=True, vote=10),
     Blog(id=2, title="Second Blog", body="This is the body of the second blog", published=False),
@@ -28,7 +24,7 @@ def find_blog(id: int):
             return blog
     return None
 
-@app.get("/blogs", response_model=list[ShowBlog])
+@app.get("/blogs", response_model=list[Blog])
 def read_blogs():
     return blogs
 
