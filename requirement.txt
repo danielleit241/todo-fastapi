@@ -1,8 +1,10 @@
 fastapi
 psycopg[binary]
-python-dotenv
 sqlalchemy
 pyjwt
 pwdlib[argon2]
-pydantic[email]
+
 python-multipart
+
+pydantic[email]
+pydantic-settings
