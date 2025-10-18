@@ -13,13 +13,3 @@ def get_db():
         yield db    
     finally:
         db.close()
-
-# while True:
-#     try:
-#         conn = engine.connect()
-#         print("Database connection successful")
-#         conn.close()
-#         break
-#     except Exception as e:
-#         print("Database connection failed")
-#         print(f"Error: {e}")

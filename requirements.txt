@@ -1,9 +1,9 @@
 fastapi
 uvicorn
-psycopg[binary]
 sqlalchemy
+psycopg2-binary
 pyjwt
-pwdlib[argon2]
+passlib[argon2]
 python-multipart
 pydantic[email]
 pydantic-settings
