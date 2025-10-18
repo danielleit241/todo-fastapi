@@ -1,14 +1,14 @@
 from fastapi.security import OAuth2PasswordRequestForm
-from typing_extensions import Annotated
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from .. import models
 from ..database import get_db
-from ..schemas import user as user_schemas, token as token_schemas
+from ..schemas import token as token_schemas
 from ..utils.hashing import Hash
 from ..utils.jwt import create_access_token
+from ..config import settings
 
 router = APIRouter(
-    prefix="/auth",
+    prefix=settings.API_PREFIX + "/auth",
     tags=["Authentication"]
 )
 

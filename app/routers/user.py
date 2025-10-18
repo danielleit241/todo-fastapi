@@ -3,9 +3,10 @@ from .. import models
 from ..database import get_db
 from ..schemas import user as user_schemas
 from ..utils.hashing import Hash
+from ..config import settings
 
 router = APIRouter(
-    prefix="/users",
+    prefix=settings.API_PREFIX + "/users",
     tags=["Users"]
 )
 

@@ -5,9 +5,10 @@ from ..utils import jwt
 from app.database import get_db
 from app.schemas.vote import VoteCreate, VoteOfUserResponse, VoteOfPostResponse
 from typing import List
+from ..config import settings
 
 router = APIRouter(
-    prefix="/votes",
+    prefix=settings.API_PREFIX + "/votes",
     tags=["Vote"]
 )
 

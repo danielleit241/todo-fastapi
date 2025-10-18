@@ -5,9 +5,10 @@ from ..utils.jwt import get_current_user
 from .. import models
 from ..database import get_db
 from ..schemas import post as post_schemas
+from ..config import settings
 
 router = APIRouter(
-    prefix="/posts",
+    prefix=settings.API_PREFIX + "/posts",
     tags=["Posts"]
 )
 
