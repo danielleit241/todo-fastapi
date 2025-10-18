@@ -33,5 +33,6 @@ async def read_root():
             "docs_url": f"{settings.API_PREFIX}/docs",
             "redoc_url": f"{settings.API_PREFIX}/redoc"}    
 
-
-
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy"}

@@ -2,8 +2,8 @@ from pydantic_settings import BaseSettings
 from pydantic import ConfigDict
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str
-    API_PREFIX: str
+    PROJECT_NAME: str | None = "My FastAPI Project"
+    API_PREFIX: str | None = "/api/v1"
     POSTGRES_USER: str
     POSTGRES_PASSWORD: str
     POSTGRES_HOST: str
@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str
     SECRET_KEY: str
     ALGORITHM: str
-    ACCESS_TOKEN_EXPIRE_MINUTES: int
+    ACCESS_TOKEN_EXPIRE_MINUTES: int | None = 30
 
     model_config = ConfigDict(
         extra="allow",
