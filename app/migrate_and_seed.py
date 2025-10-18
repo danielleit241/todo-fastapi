@@ -16,7 +16,7 @@ def run_alembic_upgrade():
 
 def run_seed():
     result = subprocess.run(
-        [sys.executable, "app/seed.py"],
+        [sys.executable, "-m", "app.seed"],
         capture_output=True, text=True
     )
 
@@ -27,6 +27,9 @@ def run_seed():
         print(result.stderr)
         sys.exit(1)
 
-if __name__ == "__main__":
+def run():
     run_alembic_upgrade()
     run_seed()
+
+if __name__ == "__main__":
+    run()
