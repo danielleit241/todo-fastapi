@@ -9,7 +9,7 @@ router = APIRouter(
     tags=["Users"]
 )
 
-@router.get("/", response_model=list[user_schemas.UserResponse])
+@router.get("", response_model=list[user_schemas.UserResponse])
 def get_all_users(db=Depends(get_db)):
     users = db.query(models.User).all()
     return users
@@ -21,7 +21,7 @@ def get_user_by_id(id: int, db=Depends(get_db)):
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
-@router.post("/", status_code=status.HTTP_201_CREATED, response_model=user_schemas.UserResponse)
+@router.post("", status_code=status.HTTP_201_CREATED, response_model=user_schemas.UserResponse)
 def create_user(user: user_schemas.UserCreate, db=Depends(get_db)):
     user_exist = db.query(models.User).filter(models.User.email == user.email).first()
     if user_exist:

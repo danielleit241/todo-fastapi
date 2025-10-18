@@ -9,7 +9,7 @@ def drop_all_tables():
 
 def create_if_not_exists_database():
     insp = inspect(engine)
-    #drop_all_tables()
+    # drop_all_tables()
     if not insp.has_table("posts") or not insp.has_table("users"):
         models.Base.metadata.create_all(bind=engine)
         print("Database and tables created.")
@@ -24,9 +24,9 @@ def seed_posts(db: Session):
     
     print("Seeding posts...")
     sample_posts = [
-        models.Post(title="First Post", content="This is the content of the first post", published=True, vote=10),
-        models.Post(title="Second Post", content="This is the content of the second post", published=False),
-        models.Post(title="Third Post", content="This is the content of the third post", published=True, vote=5),
+        models.Post(title="First Post", content="This is the content of the first post", published=True, vote=10, owner_id=1),
+        models.Post(title="Second Post", content="This is the content of the second post", published=False, owner_id=2),
+        models.Post(title="Third Post", content="This is the content of the third post", published=True, vote=5, owner_id=3),
     ]
     db.add_all(sample_posts)
     print("Posts seeded.")
@@ -51,8 +51,8 @@ def seed_data():
     create_if_not_exists_database()
     db = SessionLocal()
     try:
-        seed_posts(db)
         seed_users(db)
+        seed_posts(db)
     finally:
         db.close()
         print("Database seeding complete.")
