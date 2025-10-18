@@ -15,7 +15,7 @@ class UserResponse(UserBase):
     updated_at: datetime
     posts: list[post_schemas.PostResponse] = []
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class UserLogin(UserBase):
     password: str

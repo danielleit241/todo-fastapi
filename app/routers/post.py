@@ -1,6 +1,6 @@
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status
-
-from app.utils.jwt import get_current_user
+from ..utils.jwt import get_current_user
 from .. import models
 from ..database import get_db
 from ..schemas import post as post_schemas
@@ -10,10 +10,14 @@ router = APIRouter(
     tags=["Posts"]
 )
 
-@router.get("", response_model=list[post_schemas.PostResponse])
-def get_all_posts(db=Depends(get_db)):
-    posts = db.query(models.Post).all()
-    return posts
+@router.get("", response_model=post_schemas.PostResponseWithPagination)
+def get_all_posts(db=Depends(get_db), limit: int = 10, skip: int = 0, keyword: Optional[str] = None):
+    query = db.query(models.Post).offset(skip).limit(limit)
+    if keyword:
+        query = query.filter(models.Post.title.contains(keyword))
+    posts = query.all()
+    total = db.query(models.Post).count()
+    return post_schemas.PostResponseWithPagination(posts=posts, total=total, index=skip // limit, limit=limit)
 
 @router.get("/{id}", response_model=post_schemas.PostResponse)
 def get_post_by_id(id: int, db=Depends(get_db)):
@@ -36,11 +40,13 @@ def create_post(post: post_schemas.PostCreate, db=Depends(get_db), current_user=
     return db_post
 
 @router.put("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def update_post(id: int, updated_post: post_schemas.PostCreate, db=Depends(get_db)):
+def update_post(id: int, updated_post: post_schemas.PostCreate, db=Depends(get_db), current_user=Depends(get_current_user)):
     post = db.query(models.Post).filter(models.Post.id == id).first()
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
-    
+    if post.owner_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to update this post")
+
     post.title = updated_post.title
     post.content = updated_post.content
     post.published = updated_post.published
@@ -50,10 +56,13 @@ def update_post(id: int, updated_post: post_schemas.PostCreate, db=Depends(get_d
     return post
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_post(id: int, db=Depends(get_db)):
+def delete_post(id: int, db=Depends(get_db), current_user=Depends(get_current_user)):
     post = db.query(models.Post).filter(models.Post.id == id).first()
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
+    if post.owner_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to delete this post")
+    
     db.delete(post)
     db.commit()
     return {"detail": "Post deleted"}
