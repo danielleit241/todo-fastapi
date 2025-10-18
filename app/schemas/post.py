@@ -1,5 +1,7 @@
 from datetime import datetime
+from typing import List, Optional
 from pydantic import BaseModel
+from app.schemas.user import UserResponse
 
 class PostBase(BaseModel): 
     title: str
@@ -11,16 +13,19 @@ class PostCreate(PostBase):
 
 class PostResponse(PostBase):
     id: int
-    vote: int | None = None
     created_at: datetime
     updated_at: datetime
-    class Config:
-        from_attributes = True
+    owner: Optional[UserResponse]
+    total_votes: Optional[int] = 0
+    model_config = {
+        "from_attributes": True
+    }
 
 class PostResponseWithPagination(BaseModel):
-    posts: list[PostResponse]
+    posts: List[PostResponse]
     total: int
     index: int
     limit: int
-    class Config:
-        from_attributes = True
+    model_config = {
+        "from_attributes": True
+    }

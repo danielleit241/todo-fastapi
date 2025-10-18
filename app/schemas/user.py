@@ -13,9 +13,9 @@ class UserResponse(UserBase):
     is_active: bool
     created_at: datetime
     updated_at: datetime
-    posts: list[post_schemas.PostResponse] = []
-    class Config:
-        from_attributes = True
+    model_config = {
+        "from_attributes": True
+    }
 
 class UserLogin(UserBase):
     password: str

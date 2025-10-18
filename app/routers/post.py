@@ -1,5 +1,6 @@
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import func
 from ..utils.jwt import get_current_user
 from .. import models
 from ..database import get_db
@@ -12,12 +13,33 @@ router = APIRouter(
 
 @router.get("", response_model=post_schemas.PostResponseWithPagination)
 def get_all_posts(db=Depends(get_db), limit: int = 10, skip: int = 0, keyword: Optional[str] = None):
-    query = db.query(models.Post).offset(skip).limit(limit)
+    query = db.query(
+        models.Post,
+        func.count(models.Vote.post_id).label("total_votes")
+    ).join(
+        models.Vote,
+        models.Vote.post_id == models.Post.id,
+        isouter=True
+    ).group_by(models.Post.id)
+
     if keyword:
         query = query.filter(models.Post.title.contains(keyword))
-    posts = query.all()
-    total = db.query(models.Post).count()
-    return post_schemas.PostResponseWithPagination(posts=posts, total=total, index=skip // limit, limit=limit)
+
+    total_posts = query.count()
+    posts = query.offset(skip).limit(limit).all()
+
+    result_posts = []
+    for post, total_votes in posts:
+        post_data = post_schemas.PostResponse(post)
+        post_data.total_votes = total_votes
+        result_posts.append(post_data)
+
+    return post_schemas.PostResponseWithPagination(
+        posts=result_posts,
+        total=total_posts,
+        index=skip,
+        limit=limit
+    )
 
 @router.get("/{id}", response_model=post_schemas.PostResponse)
 def get_post_by_id(id: int, db=Depends(get_db)):
