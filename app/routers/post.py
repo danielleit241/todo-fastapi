@@ -31,7 +31,7 @@ def get_all_posts(db=Depends(get_db), limit: int = 10, skip: int = 0, keyword: O
 
     result_posts = []
     for post, total_votes in posts:
-        post_data = post_schemas.PostResponse(post)
+        post_data = post_schemas.PostResponse.model_validate(post)
         post_data.total_votes = total_votes
         result_posts.append(post_data)
 
