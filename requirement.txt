@@ -3,8 +3,7 @@ psycopg[binary]
 sqlalchemy
 pyjwt
 pwdlib[argon2]
-
 python-multipart
-
 pydantic[email]
 pydantic-settings
+alembic

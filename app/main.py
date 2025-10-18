@@ -1,8 +1,6 @@
+from asyncio import subprocess
 from fastapi import FastAPI
-from .seed import seed_data
 from .routers import post, user, auth, vote
-
-seed_data()
 
 app = FastAPI()
 
@@ -14,6 +12,9 @@ app.include_router(vote.router)
 @app.get("/")
 def read_root():
     return {"message": "Welcome to the FastAPI application!"}
+
+def startup_event():
+    subprocess.run(["python", "app/migrate_and_seed.py"])
 
 if __name__ == "__main__":
     import uvicorn

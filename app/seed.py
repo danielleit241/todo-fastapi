@@ -3,24 +3,6 @@ from sqlalchemy.orm import Session
 from . import models
 from .database import engine, SessionLocal
 
-list_models = ["posts", "users", "votes"]
-
-def drop_all_tables():
-    models.Base.metadata.drop_all(bind=engine)
-    print("All tables dropped.")
-
-def create_if_not_exists_database():
-    insp = inspect(engine)
-    drop_all_tables()
-    for model in list_models:
-        if not insp.has_table(model):
-            models.Base.metadata.create_all(bind=engine)
-            print("Database and tables created.")
-            break
-    else:
-        print("Database already exists, skipping creation.")
-        return
-
 def seed_posts(db: Session):
     if db.query(models.Post).first():
         print("Posts already seeded, skipping.")
@@ -61,13 +43,13 @@ def seed_votes(db: Session):
         models.Vote(user_id=1, post_id=1),
         models.Vote(user_id=2, post_id=1),
         models.Vote(user_id=3, post_id=2),
+        models.Vote(user_id=3, post_id=1),
     ]
     db.add_all(sample_votes)
     print("Votes seeded.")
     db.commit()
 
 def seed_data():
-    create_if_not_exists_database()
     db = SessionLocal()
     try:
         seed_users(db)
