@@ -1,7 +1,6 @@
-from sqlalchemy import inspect
 from sqlalchemy.orm import Session
 from . import models
-from .database import engine, SessionLocal
+from .database import SessionLocal
 
 def seed_posts(db: Session):
     if db.query(models.Post).first():
