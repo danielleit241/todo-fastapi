@@ -4,6 +4,7 @@ from ..database import get_db
 from ..schemas import user as user_schemas
 from ..utils.hashing import Hash
 from ..config import settings
+from ..utils.jwt import get_current_user
 
 router = APIRouter(
     prefix=settings.API_PREFIX + "/users",
@@ -11,7 +12,7 @@ router = APIRouter(
 )
 
 @router.get("", response_model=list[user_schemas.UserResponse])
-def get_all_users(db=Depends(get_db)):
+def get_all_users(db=Depends(get_db), current_user=Depends(get_current_user)):
     users = db.query(models.User).all()
     return users
 
