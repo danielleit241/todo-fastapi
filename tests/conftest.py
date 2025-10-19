@@ -1,28 +1,10 @@
 import pytest
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from app.database import Base, get_db
+from starlette.testclient import TestClient
 from app.main import app
-from fastapi.testclient import TestClient
-from app.models import User, Post, Vote
-from sqlalchemy.pool import StaticPool
-
-SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL,
-    connect_args={"check_same_thread": False},
-    poolclass=StaticPool
-)
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-def override_get_db():
-    """
-    Override the get_db dependency to use the test database."""
-    db = TestingSessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+from app.database import Base
+from tests.database import engine, override_get_db
+from app.database import get_db
+from app.config import settings
 
 app.dependency_overrides[get_db] = override_get_db
 
@@ -35,3 +17,25 @@ def client():
     with TestClient(app) as c:
         yield c
     Base.metadata.drop_all(bind=engine)
+
+
+@pytest.fixture(scope="function")
+def create_user(client):
+    def _create_user(email="test@example.com", password="testpassword"):
+        user_data = {"email": email, "password": password}
+        response = client.post(f"{settings.API_PREFIX}/users/", json=user_data)
+        assert response.status_code == 201
+        return response.json()
+    return _create_user
+
+@pytest.fixture(scope="function")
+def create_token(client, create_user):
+    def _create_token(email="test@example.com", password="testpassword"):
+        user = create_user(email=email, password=password)
+        response = client.post(f"{settings.API_PREFIX}/auth/login/", data={
+            "username": email,
+            "password": password
+        })
+        assert response.status_code == 200
+        return response.json()
+    return _create_token
