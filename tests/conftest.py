@@ -29,13 +29,30 @@ def create_user(client):
     return _create_user
 
 @pytest.fixture(scope="function")
-def create_token(client, create_user):
-    def _create_token(email="test@example.com", password="testpassword"):
-        user = create_user(email=email, password=password)
+def login_user(client, create_user):
+    def _login_user(email="test@example.com", password="testpassword"):
+        create_user(email=email, password=password)
         response = client.post(f"{settings.API_PREFIX}/auth/login/", data={
             "username": email,
             "password": password
         })
         assert response.status_code == 200
         return response.json()
+    return _login_user
+
+@pytest.fixture(scope="function")
+def create_token(client, login_user):
+    def _create_token(email="test@example.com", password="testpassword"):
+        token_data = login_user(email=email, password=password)
+        return token_data
     return _create_token
+
+@pytest.fixture(scope="function")
+def authorized_client(client, create_token):
+    def _authorized_client(email="test@example.com", password="testpassword"):
+        token = create_token(email=email, password=password)
+        headers = {
+            "Authorization": f"Bearer {token['access_token']}"
+        }
+        return client, headers
+    return _authorized_client

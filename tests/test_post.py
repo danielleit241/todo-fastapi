@@ -2,13 +2,10 @@ from app.config import settings
 import pytest
 from app.schemas.post import PostResponse, PostResponseWithPagination
 
-def test_create_post_success(client, create_token):
+def test_create_post_success(client, authorized_client):
     """Test creating a new post via
     API."""
-    token = create_token()
-    headers = {
-        "Authorization": f"Bearer {token['access_token']}"
-    }
+    client, headers = authorized_client()
     post_data = {
         "title": "Test Post",
         "content": "This is a test post content."
@@ -21,12 +18,9 @@ def test_create_post_success(client, create_token):
     assert created_post.id is not None
     assert created_post.created_at is not None
 
-def test_get_post_success(client, create_token):
+def test_get_post_success(client, authorized_client):
     """Test retrieving a post via API."""
-    token = create_token()
-    headers = {
-        "Authorization": f"Bearer {token['access_token']}"
-    }
+    client, headers = authorized_client()
     post_data = {
         "title": "Test Post",
         "content": "This is a test post content."
@@ -42,12 +36,9 @@ def test_get_post_success(client, create_token):
     assert retrieved_post.content == post_data["content"]
     assert retrieved_post.id == created_post.id
 
-def test_get_all_posts_success(client, create_token):
+def test_get_all_posts_success(client, authorized_client):
     """Test retrieving all posts via API."""
-    token = create_token()
-    headers = {
-        "Authorization": f"Bearer {token['access_token']}"
-    }
+    client, headers = authorized_client()
     post_data1 = {
         "title": "Test Post 1",
         "content": "This is the first test post content."

@@ -42,17 +42,12 @@ def test_create_user_failure_with_email_exists_with_response_400(client, email, 
     ("user@example.com", "AnotherP@ssw0rd!"),
     ("admin@example.com", "AdminP@ssw0rd!")
 ])
-def test_login_user_success_with_response_200(client, create_user, email, password):
+def test_login_user_success_with_response_200(client, login_user, email, password):
     """Test logging in a user via API."""
-    create_user(email=email, password=password)
-    response = client.post(f"{settings.API_PREFIX}/auth/login/", data={
-        "username": email,
-        "password": password
-    })
-    assert response.status_code == 200
-    token_response = token.Token(**response.json())
-    assert token_response.token_type == "bearer"
-    assert token_response.access_token is not None
+    token = login_user(email=email, password=password)
+    assert token is not None
+    assert token["token_type"] == "bearer"
+    assert token["access_token"] is not None
 
 @pytest.mark.parametrize("email, password", [
     ("invalid@example.com", "WrongP@ssw0rd!")
