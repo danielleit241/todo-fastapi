@@ -1,10 +1,6 @@
 from app.config import settings
-from app.main import app
-from fastapi.testclient import TestClient
 
-client = TestClient(app)
-
-def test_create_user():
+def test_create_user(client):
     """Test creating a new user via API."""
     user_data = {
         "email": "test@example.com",

@@ -4,6 +4,10 @@ from app.routers import post, user, auth, vote
 from . import migrate_and_seed
 from app.config import settings
 
+
+if(settings.ENVIRONMENT == "DEVELOPMENT"):
+    migrate_and_seed.run()
+
 app = FastAPI(
     title=settings.PROJECT_NAME,
     docs_url=f"{settings.API_PREFIX}/docs",
