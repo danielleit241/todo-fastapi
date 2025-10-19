@@ -1,10 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routers import post, user, auth, vote
+from app.routers import post, user, auth, vote
 from . import migrate_and_seed
-from .config import settings
-
-migrate_and_seed.run()
+from app.config import settings
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -36,3 +34,6 @@ async def read_root():
 @app.get("/health")
 async def health_check():
     return {"status": "healthy"}
+
+if __name__ == "__main__":
+    migrate_and_seed.run()
