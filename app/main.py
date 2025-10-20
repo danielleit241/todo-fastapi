@@ -39,5 +39,9 @@ async def read_root():
 async def health_check():
     return {"status": "healthy"}
 
+@app.get("/deploy")
+async def trigger_deploy():
+    return {"message": "Deploy triggered"}
+
 if __name__ == "__main__":
     migrate_and_seed.run()
