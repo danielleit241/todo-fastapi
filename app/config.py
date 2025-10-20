@@ -1,3 +1,4 @@
+import os
 from pydantic_settings import BaseSettings
 from pydantic import ConfigDict
 
@@ -19,5 +20,8 @@ class Settings(BaseSettings):
         env_file='.env',
         env_file_encoding="utf-8",   
     )
+
+if "PYTEST_CURRENT_TEST" in os.environ:
+    Settings.model_config["env_file"] = ".env.test"
 
 settings = Settings()
