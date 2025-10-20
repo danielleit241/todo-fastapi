@@ -1,0 +1,66 @@
+name: CI/CD — FastAPI → Render
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  jobs:
+    test:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v4
+
+        - name: Set up Python
+          uses: actions/setup-python@v4
+          with:
+            python-version: "3.13"
+
+        - name: Install dependencies
+          run: |
+            python -m pip install --upgrade pip
+            pip install -r requirements.txt
+
+        - name: Run tests
+          run: |
+            pytest
+
+    deploy-to-docker:
+      needs: test
+      runs-on: ubuntu-latest
+      if: github.ref == 'refs/heads/main'
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v3
+
+        - name: Set up Docker Buildx
+          uses: docker/setup-buildx-action@v2
+
+        - name: Log in to Docker Hub
+          uses: docker/login-action@v2
+          with:
+            username: ${{ secrets.DOCKER_USERNAME }}
+            password: ${{ secrets.DOCKER_PASSWORD }}
+
+        - name: Build and push Docker image
+          uses: docker/build-push-action@v4
+          with:
+            context: .
+            push: true
+            tags: ${{ secrets.DOCKER_USERNAME }}/todo-fastapi:latest
+            file: ./Dockerfile
+
+    deploy-to-render:
+      needs: test
+      runs-on: ubuntu-latest
+      if: github.ref == 'refs/heads/main'
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v3
+
+        - name: Deploy to Render
+          uses: render-examples/deploy-to-render@v1
+          with:
+            api_key: ${{ secrets.RENDER_API_KEY }}
+            service_id: ${{ secrets.RENDER_SERVICE_ID }}
